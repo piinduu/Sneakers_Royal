@@ -4,7 +4,7 @@ const seedDB = async () => {
     try {
         // Insertar usuarios
         await pool.query(`
-            INSERT INTO usuarios (username, email, password, direccion, telefono)
+            INSERT INTO users (username, email, password, direccion, telefono)
             VALUES
                 ('Antonio Perez', 'antonio.perez@email.com', 'password123', 'Calle Gran Vía 45, Madrid', '612345678'),
                 ('María López', 'maria.lopez@email.com', 'password456', 'Calle Alcalá 100, Madrid', '622345678'),
@@ -14,7 +14,7 @@ const seedDB = async () => {
 
         // Insertar zapatillas
         await pool.query(`
-            INSERT INTO snkr (style_id, name, colorway, description, release_date, retail_price, image_url)
+            INSERT INTO snkrs (style_id, name, colorway, description, release_date, retail_price, image_url)
             VALUES
                 ('AJ1-OG', 'Jordan 1 Retro High OG', 'Black/White/Red', 'Classic high-top sneaker', '2024-01-01', 170.00, 'https://via.placeholder.com/150'),
                 ('YZB-V2', 'Yeezy Boost 350 V2', 'Beluga Reflective', 'Comfortable and stylish', '2023-10-10', 220.00, 'https://via.placeholder.com/150'),
@@ -31,7 +31,7 @@ const seedDB = async () => {
 
         // Insertar precios definidos por usuarios
         await pool.query(`
-            INSERT INTO precios_user (zapatilla_id, user_id, size, price)
+            INSERT INTO user_prices (snkr_id, user_id, size, price)
             VALUES
                 (1, 1, '9', 250.00),
                 (1, 2, '10', 270.00),
@@ -42,9 +42,9 @@ const seedDB = async () => {
             ON CONFLICT DO NOTHING;
         `);
 
-        // Insertar intercambios
+        // Insertar exchanges
         await pool.query(`
-            INSERT INTO intercambios (zapatilla_id, user_id, size, status)
+            INSERT INTO exchanges (snkr_id, user_id, size, status)
             VALUES
                 (1, 1, '9', 'pendiente'),
                 (2, 2, '8', 'aceptado'),

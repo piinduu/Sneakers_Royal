@@ -1,7 +1,7 @@
 const pool = require('../config/db');
 
 // Obtener todos los usuarios
-const getUsuarios = async (req, res) => {
+const getUsers = async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM usuarios');
         res.status(200).json(result.rows);
@@ -12,7 +12,7 @@ const getUsuarios = async (req, res) => {
 };
 
 // Crear un usuario
-const createUsuario = async (req, res) => {
+const createUser = async (req, res) => {
     const { username, email, password, direccion } = req.body;
     try {
         const result = await pool.query(
@@ -26,4 +26,4 @@ const createUsuario = async (req, res) => {
     }
 };
 
-module.exports = { getUsuarios, createUsuario };
+module.exports = { getUsers, createUser };

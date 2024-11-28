@@ -3,7 +3,7 @@ const SnkrModel = require('../models/snkrs');
 // Obtener todas las zapatillas
 const getSnkrs = async (req, res) => {
     try {
-        const snkrs = await SnkrModel.getZapatillas();
+        const snkrs = await SnkrModel.getSnkrs();
         res.status(200).json(snkrs);
     } catch (error) {
         console.error(error);
@@ -15,7 +15,7 @@ const getSnkrs = async (req, res) => {
 const createSnkr = async (req, res) => {
     const { style_id, name, colorway, description, release_date, retail_price, image_url } = req.body;
     try {
-        const nuevaZapatilla = await SnkrModel.createZapatilla(
+        const newSnkr = await SnkrModel.createSnkr(
             style_id,
             name,
             colorway,
@@ -24,7 +24,7 @@ const createSnkr = async (req, res) => {
             retail_price,
             image_url
         );
-        res.status(201).json(nuevaZapatilla);
+        res.status(201).json(newSnkr);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error al crear zapatilla');

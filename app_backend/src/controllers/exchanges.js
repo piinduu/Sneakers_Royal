@@ -1,10 +1,10 @@
-const IntercambioModel = require('../models/exchanges');
+const ExchangeModel = require('../models/exchanges');
 
 // Obtener todas las ofertas de intercambio
-const getIntercambios = async (req, res) => {
+const getExchanges = async (req, res) => {
     try {
-        const intercambios = await IntercambioModel.getIntercambios();
-        res.status(200).json(intercambios);
+        const exchanges = await ExchangeModel.getExchanges();
+        res.status(200).json(exchanges);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error al obtener intercambios');
@@ -12,11 +12,11 @@ const getIntercambios = async (req, res) => {
 };
 
 // Crear una oferta de intercambio
-const createIntercambio = async (req, res) => {
-    const { zapatilla_id, user_id, size, status } = req.body;
+const createExchange = async (req, res) => {
+    const { snkr_id, user_id, size, status } = req.body;
     try {
-        const nuevoIntercambio = await IntercambioModel.createIntercambio(zapatilla_id, user_id, size, status);
-        res.status(201).json(nuevoIntercambio);
+        const newExchange = await ExchangeModel.createExchange(snkr_id, user_id, size, status);
+        res.status(201).json(newExchange);
     } catch (error) {
         console.error(error);
         res.status(500).send('Error al crear intercambio');
@@ -24,6 +24,6 @@ const createIntercambio = async (req, res) => {
 };
 
 module.exports = {
-    getIntercambios,
-    createIntercambio,
+    getExchanges,
+    createExchange,
 };

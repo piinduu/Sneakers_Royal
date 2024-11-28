@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const UsuariosModel = require('../models/usuarios');
+const UsersModel = require('../models/users');
 
 // Manejar el registro
 const register = async (req, res) => {
@@ -8,12 +8,12 @@ const register = async (req, res) => {
 
     try {
         // Validar si el usuario ya existe
-        const existingUserByEmail = await UsuariosModel.findUserByEmail(email);
+        const existingUserByEmail = await UsersModel.findUserByEmail(email);
         if (existingUserByEmail) {
             return res.status(400).json({ error: 'El email ya está en uso' });
         }
 
-        const existingUserByUsername = await UsuariosModel.findUserByUsername(username);
+        const existingUserByUsername = await UsersModel.findUserByUsername(username);
         if (existingUserByUsername) {
             return res.status(400).json({ error: 'El nombre de usuario ya está en uso' });
         }
@@ -22,7 +22,7 @@ const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Crear el nuevo usuario
-        const newUser = await UsuariosModel.createUsuario(username, email, hashedPassword, null);
+        const newUser = await UsersModel.createUser(username, email, hashedPassword, null);
 
         res.status(201).json({ message: 'Usuario registrado con éxito', user: newUser });
     } catch (error) {
@@ -37,7 +37,7 @@ const login = async (req, res) => {
 
     try {
         // Verificar si el usuario existe
-        const user = await UsuariosModel.findUserByEmail(email);
+        const user = await UsersModel.findUserByEmail(email);
         if (!user) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }

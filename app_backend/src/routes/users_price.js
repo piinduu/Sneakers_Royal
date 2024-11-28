@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const PreciosUserController = require('../controllers/users_price');
+const UserPricesController = require('../controllers/users_price');
 
 // Ruta para obtener precios de una zapatilla
-router.get('/:zapatilla_id', PreciosUserController.getPreciosBySnkr);
+router.get('/:snkr_id', UserPricesController.getPricesBySnkr);
 
-// Ruta para crear un precio
-router.post('/', PreciosUserController.createPrecio);
+// Ruta para crear o actualizar un precio
+router.post('/', UserPricesController.createPrice);
 
 module.exports = router;

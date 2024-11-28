@@ -5,17 +5,17 @@ const app = express();
 app.use(express.json());
 
 // Importar rutas
-const usuariosRoutes = require('./routes/usuarios');
+const usersRoutes = require('./routes/usuarios');
 const snkrsRoutes = require('./routes/snkrs');
-const preciosUserRoutes = require('./routes/users_price');
-const intercambiosRoutes = require('./routes/exchanges');
+const userPricesRoutes = require('./routes/users_price');
+const exchangeRoutes = require('./routes/exchanges');
 const authRoutes = require('./routes/auth');
 
 // Registrar rutas
-app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/users', usersRoutes);
 app.use('/api/snkrs', snkrsRoutes);
-app.use('/api/precios', preciosUserRoutes);
-app.use('/api/intercambios', intercambiosRoutes);
+app.use('/api/prices', userPricesRoutes);
+app.use('/api/exchanges', exchangeRoutes);
 app.use('/api/auth', authRoutes);
 
 // Ruta de prueba
