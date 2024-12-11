@@ -2,7 +2,7 @@ const pool = require('./db');
 
 const createTables = async () => {
     try {
-        // Crear tabla usuarios
+        // Crear tabla users
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -15,7 +15,7 @@ const createTables = async () => {
             );
         `);
 
-        // Crear tabla snkrs (zapatillas)
+        // Crear tabla snkrs
         await pool.query(`
             CREATE TABLE IF NOT EXISTS snkrs (
                 id SERIAL PRIMARY KEY,
@@ -48,16 +48,29 @@ const createTables = async () => {
                 snkr_id INT REFERENCES snkrs(id) ON DELETE CASCADE,
                 user_id INT REFERENCES users(id) ON DELETE CASCADE,
                 size VARCHAR(10) NOT NULL,
+                condition VARCHAR(50) NOT NULL,
                 status VARCHAR(20) DEFAULT 'pendiente',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
 
+        // Crear tabla exchange_requests
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS exchange_requests (
+                id SERIAL PRIMARY KEY,
+                exchange_id INT REFERENCES exchanges(id) ON DELETE CASCADE,
+                snkr_id INT REFERENCES snkrs(id) ON DELETE CASCADE,
+                size VARCHAR(10) NOT NULL,
+                condition VARCHAR(50) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
         console.log('Tablas creadas exitosamente.');
-        pool.end(); // Cierra la conexión con la base de datos
+        pool.end();
     } catch (error) {
         console.error('Error creando las tablas:', error);
-        pool.end(); // Asegúrate de cerrar la conexión en caso de error
+        pool.end();
     }
 };
 

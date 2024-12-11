@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cronJobs = require('./config/cronJobs'); 
 
 // Middleware para parsear JSON
 app.use(express.json());
