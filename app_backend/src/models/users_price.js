@@ -21,6 +21,15 @@ const getMinPricesBySnkr = async (snkr_id) => {
     return result.rows;
 };
 
+// Obtener el precio actual por snkr_id, user_id y size
+const getPriceBySnkrAndUser = async (snkr_id, user_id, size) => {
+    const result = await pool.query(
+        'SELECT price FROM user_prices WHERE snkr_id = $1 AND user_id = $2 AND size = $3',
+        [snkr_id, user_id, size]
+    );
+    return result.rows[0]; // Devuelve el precio actual o undefined si no existe
+};
+
 // Crear o actualizar un precio definido por un usuario
 const createOrUpdatePrice = async (snkr_id, user_id, size, price) => {
     const existingPrice = await pool.query(
@@ -48,5 +57,6 @@ const createOrUpdatePrice = async (snkr_id, user_id, size, price) => {
 module.exports = {
     getPricesBySnkr,
     getMinPricesBySnkr,
+    getPriceBySnkrAndUser,
     createOrUpdatePrice,
 };

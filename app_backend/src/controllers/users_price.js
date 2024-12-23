@@ -40,6 +40,14 @@ const createPrice = async (req, res) => {
             return res.status(404).json({ error: 'user no encontrado' });
         }
 
+        // Validar si el precio actual es menor o igual
+        const existingPrice = await UserPricesModel.getPriceBySnkrAndUser(snkr_id, user_id, size);
+        if (existingPrice && price > existingPrice.price) {
+            return res.status(400).json({
+                error: 'El nuevo precio no puede ser mayor al precio actual',
+            });
+        }
+
         // Crear o actualizar el precio
         const newPrice = await UserPricesModel.createOrUpdatePrice(snkr_id, user_id, size, price);
 

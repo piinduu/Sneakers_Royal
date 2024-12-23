@@ -6,7 +6,7 @@ const cronJobs = require('./config/cronJobs');
 app.use(express.json());
 
 // Importar rutas
-const usersRoutes = require('./routes/usuarios');
+const usersRoutes = require('./routes/users');
 const snkrsRoutes = require('./routes/snkrs');
 const userPricesRoutes = require('./routes/users_price');
 const exchangeRoutes = require('./routes/exchanges');
