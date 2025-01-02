@@ -21,8 +21,29 @@ const getSnkrById = async (id) => {
     return result.rows[0];
 };
 
+const searchSnkrs = async (req, res) => {
+    const { query } = req.query; // Término de búsqueda recibido del frontend
+    try {
+        const results = await SnkrModel.searchSnkrs(query); // Llama al modelo para buscar
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error al buscar zapatillas:', error);
+        res.status(500).json({ error: 'Error al buscar zapatillas' });
+    }
+};
+
+const searchByName = async (query) => {
+    const result = await pool.query(
+        'SELECT * FROM snkrs WHERE name ILIKE $1',
+        [`%${query}%`]
+    );
+    return result.rows;
+};
+
 module.exports = {
     getSnkrs,
     createSnkr,
     getSnkrById,
+    searchSnkrs,
+    searchByName,
 };

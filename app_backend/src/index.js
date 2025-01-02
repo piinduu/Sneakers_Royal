@@ -1,9 +1,24 @@
 const express = require('express');
+const cors = require('cors'); // Importar CORS
 const app = express();
-const cronJobs = require('./config/cronJobs'); 
+const cronJobs = require('./config/cronJobs');
 
 // Middleware para parsear JSON
 app.use(express.json());
+
+// Configurar CORS para permitir solicitudes desde el frontend
+app.use(cors({
+    origin: (origin, callback) => {
+        // Permitir solicitudes desde cualquier "localhost"
+        if (!origin || origin.startsWith('http://localhost')) {
+            callback(null, true);
+        } else {
+            callback(new Error('No permitido por CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos HTTP permitidos
+    credentials: true // Si necesitas enviar cookies o autenticación
+}));
 
 // Importar rutas
 const usersRoutes = require('./routes/users');
