@@ -47,11 +47,9 @@ function Header() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Verifica si el clic ocurrió fuera del cuadro de sugerencias
       if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
         setShowSuggestions(false);
       }
-      // Verifica si el clic ocurrió fuera del menú de usuario
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
       }
@@ -65,16 +63,13 @@ function Header() {
 
   return (
     <header className="bg-primary text-white py-4 px-6 flex items-center justify-between relative">
-      {/* Título SNKRS ROYAL */}
       <h1
         className="text-xl font-bold cursor-pointer"
         onClick={() => {
           const token = localStorage.getItem("token");
           if (token) {
-            // Si hay token, redirige al Home
             window.location.href = "/home";
           } else {
-            // Si no hay token, redirige al Login
             window.location.href = "/";
           }
         }}
@@ -82,7 +77,6 @@ function Header() {
         SNKRS ROYAL
       </h1>
 
-      {/* Barra de búsqueda */}
       <div className="flex-1 flex justify-center">
         <form onSubmit={handleSearch} className="relative w-full max-w-md">
           <input
@@ -128,12 +122,14 @@ function Header() {
         </form>
       </div>
 
-      {/* Botones adicionales */}
       <div className="flex items-center space-x-4">
         <button className="bg-secondary px-4 py-2 rounded text-white font-semibold hover:bg-muted">
           Sell
         </button>
-        <button className="bg-secondary px-4 py-2 rounded text-white font-semibold hover:bg-muted">
+        <button
+          className="bg-secondary px-4 py-2 rounded text-white font-semibold hover:bg-muted"
+          onClick={() => (window.location.href = "/new-exchange")}
+        >
           Exchange
         </button>
         <div className="relative" ref={userMenuRef}>

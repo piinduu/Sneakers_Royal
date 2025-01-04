@@ -11,13 +11,15 @@ const SneakerDetails = React.lazy(() => import("./pages/SneakerDetails"));
 const PurchaseSummary = React.lazy(() => import("./pages/PurchaseSummary"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Register = React.lazy(() => import("./pages/Register"));
+const NewExchange = React.lazy(() => import("./pages/NewExchange"));
+const ExchangeDetails = React.lazy(() => import("./pages/ExchangeDetails"));
+const ExchangeRequest = React.lazy(() => import("./pages/ExchangeRequest"));
 
 function App() {
   return (
     <Router>
       <Suspense fallback={<div>Cargando...</div>}>
         <Routes>
-          {/* Redirigir desde la raíz a /login */}
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -55,6 +57,33 @@ function App() {
             element={
               <ProtectedRoute>
                 <PurchaseSummary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/new-exchange"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <NewExchange />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/new-exchange/details"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <ExchangeDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exchange-request"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <ExchangeRequest />
               </ProtectedRoute>
             }
           />
