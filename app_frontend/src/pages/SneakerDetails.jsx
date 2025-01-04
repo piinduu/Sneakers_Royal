@@ -63,7 +63,14 @@ function SneakerDetails() {
             alert("Por favor, selecciona una talla antes de comprar.");
             return;
         }
-        navigate(`/purchase/${id}?size=${selectedSize}`);
+
+        // Redirigir a PurchaseSummary con los datos necesarios
+        navigate("/purchase-summary", {
+            state: {
+                sneaker, // Enviar detalles del producto
+                selectedSize, // Enviar talla seleccionada
+            },
+        });
     };
 
     return (
@@ -111,7 +118,7 @@ function SneakerDetails() {
                         <div
                             key={related.id}
                             className="cursor-pointer w-1/3"
-                            onClick={() => navigate(`/sneakers/${related.id}`)}
+                            onClick={() => navigate(`/sneaker/${related.id}`)}
                         >
                             <img
                                 src={related.image_url}

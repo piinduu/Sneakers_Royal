@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
 function Header() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -19,7 +19,7 @@ function Header() {
       setSearchResults(data);
       setShowSuggestions(false);
     } catch (error) {
-      console.error('Error al buscar zapatillas:', error);
+      console.error("Error al buscar zapatillas:", error);
     }
   };
 
@@ -37,7 +37,7 @@ function Header() {
         setSearchResults(data);
         setShowSuggestions(true);
       } catch (error) {
-        console.error('Error al buscar zapatillas:', error);
+        console.error("Error al buscar zapatillas:", error);
       }
     } else {
       setSearchResults([]);
@@ -57,16 +57,28 @@ function Header() {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   return (
     <header className="bg-primary text-white py-4 px-6 flex items-center justify-between relative">
       {/* Título SNKRS ROYAL */}
-      <h1 className="text-xl font-bold cursor-pointer" onClick={() => (window.location.href = '/')}>
+      <h1
+        className="text-xl font-bold cursor-pointer"
+        onClick={() => {
+          const token = localStorage.getItem("token");
+          if (token) {
+            // Si hay token, redirige al Home
+            window.location.href = "/home";
+          } else {
+            // Si no hay token, redirige al Login
+            window.location.href = "/";
+          }
+        }}
+      >
         SNKRS ROYAL
       </h1>
 
@@ -144,7 +156,13 @@ function Header() {
               <a href="/exchanges" className="block px-4 py-2 hover:bg-gray-100">
                 Mis Exchanges
               </a>
-              <button className="block px-4 py-2 text-left w-full hover:bg-gray-100">
+              <button
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  window.location.href = "/";
+                }}
+                className="block px-4 py-2 text-left w-full hover:bg-gray-100"
+              >
                 Logout
               </button>
             </div>
