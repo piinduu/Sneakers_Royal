@@ -23,7 +23,11 @@ function Login() {
       }
 
       const data = await response.json();
+
+      // Guardar token y userId en localStorage
       localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.user.id); // Esto se usará en las solicitudes autenticadas
+
       alert("Inicio de sesión exitoso");
       navigate("/home");
     } catch (error) {

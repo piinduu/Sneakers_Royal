@@ -4,11 +4,18 @@ import { useLocation, useNavigate } from "react-router-dom";
 function ExchangeRequest() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { exchangeData } = location.state || {};
+    const { exchangeData } = location.state || {}; // Datos del intercambio creado previamente
 
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [selectedSneakers, setSelectedSneakers] = useState([]);
+
+    useEffect(() => {
+        if (!exchangeData) {
+            alert("No se encontraron datos del intercambio. Redirigiendo...");
+            navigate("/new-exchange");
+        }
+    }, [exchangeData, navigate]);
 
     useEffect(() => {
         const fetchSearchResults = async () => {
@@ -21,7 +28,7 @@ function ExchangeRequest() {
                     const data = await response.json();
                     setSearchResults(data);
                 } catch (error) {
-                    console.error("Error:", error);
+                    console.error("Error al buscar zapatillas:", error);
                 }
             } else {
                 setSearchResults([]);
@@ -40,35 +47,69 @@ function ExchangeRequest() {
             alert("Ya has seleccionado esta zapatilla.");
             return;
         }
-        setSelectedSneakers([...selectedSneakers, sneaker]);
-        setSearchResults([]); // Oculta las sugerencias al seleccionar
-        setSearchTerm(""); // Limpia el campo de búsqueda
+        setSelectedSneakers([...selectedSneakers, { ...sneaker, size: "", condition: "" }]); // Añadir talla y estado vacíos inicialmente
+        setSearchResults([]);
+        setSearchTerm("");
+    };
+
+    const handleSizeChange = (id, size) => {
+        setSelectedSneakers((prevSneakers) =>
+            prevSneakers.map((s) => (s.id === id ? { ...s, size } : s))
+        );
+    };
+
+    const handleConditionChange = (id, condition) => {
+        setSelectedSneakers((prevSneakers) =>
+            prevSneakers.map((s) => (s.id === id ? { ...s, condition } : s))
+        );
     };
 
     const handleRemoveSneaker = (sneakerId) => {
         setSelectedSneakers(selectedSneakers.filter((s) => s.id !== sneakerId));
     };
 
-    const handleConfirm = () => {
-        if (selectedSneakers.length === 0) {
-            alert("Selecciona al menos una zapatilla para el intercambio.");
+    const handleConfirm = async () => {
+        if (selectedSneakers.some((s) => !s.size || !s.condition)) {
+            alert("Por favor, selecciona talla y estado para todas las zapatillas.");
             return;
         }
 
-        console.log("Intercambio finalizado con:", {
-            ...exchangeData,
-            requestedSneakers: selectedSneakers,
-        });
+        try {
+            const token = localStorage.getItem("token"); // Obtener el token almacenado
 
-        alert("¡Intercambio finalizado!");
-        navigate("/home");
+            const response = await fetch(`http://localhost:3000/api/exchanges/${exchangeData.id}/accepted-sneakers`, {
+                method: "PUT", // Cambiado a PUT
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Enviar el token
+                },
+                body: JSON.stringify({
+                    acceptedSneakers: selectedSneakers.map((s) => ({
+                        snkr_id: s.id,
+                        size: s.size,
+                        condition: s.condition,
+                    })),
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Error del backend:", errorData);
+                throw new Error("Error al actualizar las solicitudes de intercambio.");
+            }
+
+            alert("¡Intercambio completado!");
+            navigate("/home"); // Redirigir al Home
+        } catch (error) {
+            console.error("Error al actualizar solicitudes de intercambio:", error);
+            alert("Hubo un problema al completar el intercambio.");
+        }
     };
 
     return (
         <div className="max-w-screen-lg mx-auto p-6">
             <h1 className="text-3xl font-bold text-center mb-6">Selecciona tu intercambio</h1>
 
-            {/* Barra de búsqueda */}
             <div className="relative mb-4">
                 <input
                     type="text"
@@ -100,7 +141,6 @@ function ExchangeRequest() {
                 )}
             </div>
 
-            {/* Zapatillas seleccionadas */}
             {selectedSneakers.length > 0 && (
                 <div className="p-4 border rounded shadow mb-6">
                     <p className="text-lg font-semibold">Has seleccionado:</p>
@@ -119,6 +159,34 @@ function ExchangeRequest() {
                                     <p className="font-semibold">{sneaker.name}</p>
                                     <p className="text-sm text-gray-500">{sneaker.style_id}</p>
                                 </div>
+                                <div className="mt-2">
+                                    <select
+                                        className="w-full px-2 py-1 rounded border"
+                                        value={sneaker.size}
+                                        onChange={(e) => handleSizeChange(sneaker.id, e.target.value)}
+                                    >
+                                        <option value="">Selecciona talla</option>
+                                        {[...Array(16)].map((_, i) => (
+                                            <option key={i} value={35 + i}>
+                                                {35 + i}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="mt-2">
+                                    <select
+                                        className="w-full px-2 py-1 rounded border"
+                                        value={sneaker.condition}
+                                        onChange={(e) =>
+                                            handleConditionChange(sneaker.id, e.target.value)
+                                        }
+                                    >
+                                        <option value="">Selecciona estado</option>
+                                        <option value="nuevo">Nuevo</option>
+                                        <option value="nuevo-con-defectos">Nuevo con defectos</option>
+                                        <option value="usado">Usado</option>
+                                    </select>
+                                </div>
                                 <button
                                     className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                                     onClick={() => handleRemoveSneaker(sneaker.id)}
@@ -131,7 +199,6 @@ function ExchangeRequest() {
                 </div>
             )}
 
-            {/* Botón Confirmar */}
             <div className="text-center mt-6">
                 <button
                     className="bg-accent text-white py-2 px-4 rounded hover:bg-muted"

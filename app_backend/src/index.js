@@ -17,7 +17,8 @@ app.use(cors({
         }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos HTTP permitidos
-    credentials: true // Si necesitas enviar cookies o autenticación
+    credentials: true, // Si necesitas enviar cookies o autenticación
+    allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
 }));
 
 // Importar rutas

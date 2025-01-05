@@ -26,22 +26,35 @@ const getExchangesWithPagination = async (req, res) => {
 
 // Crear una nueva oferta de intercambio
 const createExchange = async (req, res) => {
-    const { snkr_id, user_id, size, condition, status = 'pendiente', duration } = req.body;
+    const { snkr_id, size, condition, duration, acceptedSneakers } = req.body;
 
-    if (![7, 15, 30].includes(duration)) {
-        return res.status(400).json({ error: 'Duración inválida. Solo se permite 7, 15 o 30 días.' });
+    // Validar los datos principales
+    if (!snkr_id || !size || !condition || !duration) {
+        console.error("Error de validación: Datos incompletos o incorrectos.");
+        return res.status(400).json({ error: "Datos incompletos o incorrectos." });
     }
 
     try {
-        const newExchange = await ExchangeModel.createExchange(snkr_id, user_id, size, condition, status, duration);
+        const user_id = req.user.id; // ID del usuario autenticado
+        console.log("ID del usuario autenticado:", user_id);
+
+        const newExchange = await ExchangeModel.createExchange(
+            snkr_id,
+            user_id,
+            size,
+            condition,
+            duration,
+            acceptedSneakers || []
+        );
+
         res.status(201).json(newExchange);
     } catch (error) {
-        console.error('Error al crear intercambio:', error);
-        res.status(500).json({ error: 'Error al crear intercambio' });
+        console.error("Error al crear intercambio:", error);
+        res.status(500).json({ error: "Error al crear intercambio." });
     }
 };
 
-// Actualizar un intercambio existente
+// Actualizar detalles generales del intercambio
 const updateExchange = async (req, res) => {
     const { id } = req.params;
     const { status, condition } = req.body;
@@ -55,6 +68,31 @@ const updateExchange = async (req, res) => {
     } catch (error) {
         console.error('Error al actualizar intercambio:', error);
         res.status(500).json({ error: 'Error al actualizar intercambio' });
+    }
+};
+
+// Actualizar zapatillas aceptadas en un intercambio existente
+const updateAcceptedSneakers = async (req, res) => {
+    const { id } = req.params; // ID del intercambio
+    const { acceptedSneakers } = req.body; // Zapatillas aceptadas
+
+    // Validar los datos
+    if (!Array.isArray(acceptedSneakers) || acceptedSneakers.length === 0) {
+        return res.status(400).json({ error: 'Datos incompletos o incorrectos.' });
+    }
+
+    try {
+        console.log(`Actualizando zapatillas aceptadas para el intercambio ID: ${id}`);
+        const updatedSneakers = await ExchangeModel.updateExchangeAcceptedSneakers(id, acceptedSneakers);
+
+        if (!updatedSneakers) {
+            return res.status(404).json({ error: 'Intercambio no encontrado' });
+        }
+
+        res.status(200).json({ message: 'Zapatillas aceptadas actualizadas con éxito', updatedSneakers });
+    } catch (error) {
+        console.error('Error al actualizar zapatillas aceptadas:', error);
+        res.status(500).json({ error: 'Error al actualizar zapatillas aceptadas' });
     }
 };
 
@@ -79,5 +117,6 @@ module.exports = {
     getExchangesWithPagination,
     createExchange,
     updateExchange,
+    updateAcceptedSneakers,
     deleteExchange,
 };
