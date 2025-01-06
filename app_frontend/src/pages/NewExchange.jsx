@@ -77,7 +77,7 @@ function NewExchange() {
                 </button>
                 {searchResults.length > 0 && (
                     <div className="absolute mt-2 bg-white w-full max-w-md rounded-lg shadow-lg z-10">
-                        {searchResults.map((sneaker) => (
+                        {searchResults.slice(0, 5).map((sneaker) => ( // Limitar a 5 resultados
                             <div
                                 key={sneaker.id}
                                 className="p-2 flex items-center hover:bg-gray-100 cursor-pointer"

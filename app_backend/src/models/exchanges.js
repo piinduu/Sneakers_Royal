@@ -10,9 +10,9 @@ const createExchange = async (snkr_id, user_id, size, condition, duration, accep
 
         // Crear el intercambio principal
         const exchangeResult = await client.query(
-            `INSERT INTO exchanges (snkr_id, user_id, size, condition, status, created_at)
-             VALUES ($1, $2, $3, $4, 'pendiente', NOW()) RETURNING *`,
-            [snkr_id, user_id, size, condition]
+            `INSERT INTO exchanges (snkr_id, user_id, size, condition, status, duration, created_at)
+             VALUES ($1, $2, $3, $4, 'pendiente', $5, NOW()) RETURNING *`,
+            [snkr_id, user_id, size, condition, duration]
         );
 
         const exchangeId = exchangeResult.rows[0].id;
@@ -38,6 +38,46 @@ const createExchange = async (snkr_id, user_id, size, condition, duration, accep
     } finally {
         client.release();
     }
+};
+
+// Obtener intercambios activos para un usuario con información adicional
+const getActiveExchanges = async (userId) => {
+    const result = await pool.query(`
+        SELECT 
+            e.id,
+            e.size,
+            e.condition,
+            e.status,
+            e.duration,
+            e.created_at,
+            s.name AS sneaker_name,
+            s.image_url AS image_url
+        FROM exchanges e
+        JOIN snkrs s ON e.snkr_id = s.id
+        WHERE e.user_id = $1
+        ORDER BY e.created_at DESC
+    `, [userId]);
+
+    console.log("Resultado de la consulta:", result.rows); // Agrega este log
+
+    return result.rows.map((row) => ({
+        ...row,
+        time_left: Math.max(0, Math.ceil((new Date(row.created_at).getTime() + row.duration * 24 * 60 * 60 * 1000 - Date.now()) / (1000 * 60 * 60 * 24))) // Calcula los días restantes
+    }));
+};
+
+
+// Obtener intercambios activos con paginación
+const getExchangesWithPagination = async (page, limit) => {
+    const offset = (page - 1) * limit;
+    const result = await pool.query(
+        `SELECT * FROM exchanges 
+         WHERE NOW() - created_at <= INTERVAL '30 days' 
+         ORDER BY created_at DESC 
+         LIMIT $1 OFFSET $2`,
+        [limit, offset]
+    );
+    return result.rows;
 };
 
 // Actualizar un intercambio con zapatillas aceptadas
@@ -74,30 +114,6 @@ const updateExchangeAcceptedSneakers = async (exchangeId, acceptedSneakers) => {
     }
 };
 
-// Obtener intercambios activos
-const getActiveExchanges = async () => {
-    const result = await pool.query(`
-        SELECT * 
-        FROM exchanges 
-        WHERE NOW() - created_at <= INTERVAL '30 days'
-        ORDER BY created_at DESC
-    `);
-    return result.rows;
-};
-
-// Obtener intercambios activos con paginación
-const getExchangesWithPagination = async (page, limit) => {
-    const offset = (page - 1) * limit;
-    const result = await pool.query(
-        `SELECT * FROM exchanges 
-         WHERE NOW() - created_at <= INTERVAL '30 days' 
-         ORDER BY created_at DESC 
-         LIMIT $1 OFFSET $2`,
-        [limit, offset]
-    );
-    return result.rows;
-};
-
 // Actualizar un intercambio
 const updateExchange = async (id, status, condition) => {
     const result = await pool.query(
@@ -124,14 +140,14 @@ const deleteExpiredExchanges = async () => {
         DELETE FROM exchanges
         WHERE created_at + (duration || ' days')::interval < NOW()
     `);
-    return result;
+    return result.rowCount;
 };
 
 module.exports = {
     createExchange,
-    updateExchangeAcceptedSneakers,
     getActiveExchanges,
     getExchangesWithPagination,
+    updateExchangeAcceptedSneakers,
     updateExchange,
     deleteExchange,
     deleteExpiredExchanges,

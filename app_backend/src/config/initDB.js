@@ -50,6 +50,7 @@ const createTables = async () => {
                 size VARCHAR(10) NOT NULL,
                 condition VARCHAR(50) NOT NULL,
                 status VARCHAR(20) DEFAULT 'pendiente',
+                duration INT NOT NULL, -- Nueva columna para la duración
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);

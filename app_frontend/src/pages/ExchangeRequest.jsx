@@ -120,7 +120,7 @@ function ExchangeRequest() {
                 />
                 {searchResults.length > 0 && (
                     <div className="absolute z-10 bg-white border rounded shadow mt-2 w-full">
-                        {searchResults.map((sneaker) => (
+                        {searchResults.slice(0, 5).map((sneaker) => ( // Limitar a 5 resultados
                             <div
                                 key={sneaker.id}
                                 className="p-2 flex items-center hover:bg-gray-100 cursor-pointer"

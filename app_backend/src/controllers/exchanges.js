@@ -1,9 +1,10 @@
 const ExchangeModel = require('../models/exchanges');
 
-// Obtener todas las ofertas de intercambio activas
+// Obtener todas las ofertas de intercambio activas para el usuario autenticado
 const getActiveExchanges = async (req, res) => {
     try {
-        const exchanges = await ExchangeModel.getActiveExchanges();
+        const userId = req.user.id; // ID del usuario autenticado
+        const exchanges = await ExchangeModel.getActiveExchanges(userId);
         res.status(200).json(exchanges);
     } catch (error) {
         console.error('Error al obtener intercambios activos:', error);

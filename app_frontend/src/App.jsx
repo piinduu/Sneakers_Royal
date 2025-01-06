@@ -14,6 +14,7 @@ const Register = React.lazy(() => import("./pages/Register"));
 const NewExchange = React.lazy(() => import("./pages/NewExchange"));
 const ExchangeDetails = React.lazy(() => import("./pages/ExchangeDetails"));
 const ExchangeRequest = React.lazy(() => import("./pages/ExchangeRequest"));
+const UserExchanges = React.lazy(() => import("./pages/UserExchanges"));
 
 function App() {
   return (
@@ -84,6 +85,15 @@ function App() {
               <ProtectedRoute>
                 <Header />
                 <ExchangeRequest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exchanges"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <UserExchanges />
               </ProtectedRoute>
             }
           />
