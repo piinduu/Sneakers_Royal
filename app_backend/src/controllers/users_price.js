@@ -1,21 +1,11 @@
 const UserPricesModel = require('../models/users_price');
-const SnkrModel = require('../models/snkrs'); // Para validar snkrs
-const usersModel = require('../models/users'); // Para validar users
+const SnkrModel = require('../models/snkrs');
 
-// Obtener precios mínimos por talla para una snkr
+// Obtener precios mínimos por talla para una zapatilla
 const getPricesBySnkr = async (req, res) => {
     const { snkr_id } = req.params;
-
     try {
-        // Verificar que la snkr existe
-        const snkr = await SnkrModel.getSnkrById(snkr_id);
-        if (!snkr) {
-            return res.status(404).json({ error: 'snkr no encontrada' });
-        }
-
-        // Obtener precios mínimos por talla
         const prices = await UserPricesModel.getMinPricesBySnkr(snkr_id);
-
         res.status(200).json(prices);
     } catch (error) {
         console.error('Error al obtener precios:', error);
@@ -23,33 +13,31 @@ const getPricesBySnkr = async (req, res) => {
     }
 };
 
-// Crear o actualizar un precio definido por un user
+// Crear o actualizar un precio definido por un usuario
 const createPrice = async (req, res) => {
-    const { snkr_id, user_id, size, price } = req.body;
+    const { snkr_id, size, price } = req.body;
+    const user_id = req.user.id; // Extraer el ID del usuario autenticado
 
     try {
-        // Validar que la snkr existe
+        // Validar que la zapatilla existe
         const snkr = await SnkrModel.getSnkrById(snkr_id);
         if (!snkr) {
-            return res.status(404).json({ error: 'snkr no encontrada' });
+            return res.status(404).json({ error: 'Zapatilla no encontrada' });
         }
 
-        // Validar que el user existe
-        const user = await usersModel.findUserById(user_id);
-        if (!user) {
-            return res.status(404).json({ error: 'user no encontrado' });
-        }
-
-        // Validar si el precio actual es menor o igual
-        const existingPrice = await UserPricesModel.getPriceBySnkrAndUser(snkr_id, user_id, size);
-        if (existingPrice && price > existingPrice.price) {
+        // Validar si el precio es menor al precio más bajo actual
+        const lowestPrice = await UserPricesModel.getLowestPriceBySnkr(snkr_id, size);
+        if (lowestPrice && price >= lowestPrice.price) {
             return res.status(400).json({
-                error: 'El nuevo precio no puede ser mayor al precio actual',
+                error: `El precio debe ser menor que el precio actual más bajo: €${lowestPrice.price}`,
             });
         }
 
-        // Crear o actualizar el precio
+        // Crear o actualizar el precio en `user_prices`
         const newPrice = await UserPricesModel.createOrUpdatePrice(snkr_id, user_id, size, price);
+
+        // Actualizar la tabla `lowest_prices`
+        await UserPricesModel.updateLowestPrice(snkr_id, user_id, size, price);
 
         res.status(201).json(newPrice);
     } catch (error) {

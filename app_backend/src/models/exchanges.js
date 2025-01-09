@@ -143,6 +143,8 @@ const deleteExpiredExchanges = async () => {
     return result.rowCount;
 };
 
+
+
 module.exports = {
     createExchange,
     getActiveExchanges,

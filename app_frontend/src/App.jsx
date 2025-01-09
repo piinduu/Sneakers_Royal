@@ -15,6 +15,11 @@ const NewExchange = React.lazy(() => import("./pages/NewExchange"));
 const ExchangeDetails = React.lazy(() => import("./pages/ExchangeDetails"));
 const ExchangeRequest = React.lazy(() => import("./pages/ExchangeRequest"));
 const UserExchanges = React.lazy(() => import("./pages/UserExchanges"));
+const SellInfo = React.lazy(() => import("./pages/SellInfo"));
+const SellDetails = React.lazy(() => import("./pages/SellDetails"));
+const SellSetPrice = React.lazy(() => import("./pages/SellSetPrice"));
+const AllExchanges = React.lazy(() => import("./pages/AllExchanges"));
+const AllExchangesDetails = React.lazy(() => import("./pages/AllExchangesDetails"));
 
 function App() {
   return (
@@ -94,6 +99,53 @@ function App() {
               <ProtectedRoute>
                 <Header />
                 <UserExchanges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sell"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <SellInfo />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sell/details"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <SellDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sell/set-price"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <SellSetPrice />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exchanges/all"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <Subheader />
+                <AllExchanges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exchanges/details/:id"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <Subheader />
+                <AllExchangesDetails />
               </ProtectedRoute>
             }
           />

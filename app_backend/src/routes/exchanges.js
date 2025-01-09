@@ -3,11 +3,17 @@ const router = express.Router();
 const ExchangeController = require('../controllers/exchanges');
 const authMiddleware = require('../middleware/authMiddleware'); // Importar el middleware de autenticación
 
+// Ruta para obtener todos los intercambios
+router.get('/all', ExchangeController.getAllActiveExchanges);
+
 // Ruta para obtener todos los intercambios activos (máximo 30 días)
 router.get('/', authMiddleware, ExchangeController.getActiveExchanges);
 
 // Ruta para obtener intercambios activos con paginación
 router.get('/paginated', authMiddleware, ExchangeController.getExchangesWithPagination);
+
+// Obtener los detalles de un intercambio por ID
+router.get('/:id', ExchangeController.getExchangeById);
 
 // Ruta para crear un nuevo intercambio
 router.post('/', authMiddleware, ExchangeController.createExchange);

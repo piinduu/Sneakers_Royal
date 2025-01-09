@@ -17,7 +17,16 @@ function Header() {
       }
       const data = await response.json();
       setSearchResults(data);
-      setShowSuggestions(false);
+
+      // Si hay un único resultado, redirigir automáticamente
+      if (data.length === 1) {
+        window.location.href = `/sneaker/${data[0].id}`;
+      } else if (data.length > 0) {
+        // Si hay más de un resultado, redirigir al primer resultado
+        window.location.href = `/sneaker/${data[0].id}`;
+      } else {
+        alert("No se encontraron zapatillas para tu búsqueda.");
+      }
     } catch (error) {
       console.error("Error al buscar zapatillas:", error);
     }
@@ -104,6 +113,7 @@ function Header() {
                   onClick={() => {
                     setSearchTerm(snkr.name);
                     setShowSuggestions(false);
+                    window.location.href = `/sneaker/${snkr.id}`; // Redirige a los detalles de la zapatilla
                   }}
                 >
                   <img
@@ -123,7 +133,10 @@ function Header() {
       </div>
 
       <div className="flex items-center space-x-4">
-        <button className="bg-secondary px-4 py-2 rounded text-white font-semibold hover:bg-muted">
+        <button
+          className="bg-secondary px-4 py-2 rounded text-white font-semibold hover:bg-muted"
+          onClick={() => (window.location.href = "/sell")}
+        >
           Sell
         </button>
         <button

@@ -7,34 +7,71 @@ function SneakerDetails() {
     const [sneaker, setSneaker] = useState(null);
     const [relatedSneakers, setRelatedSneakers] = useState([]);
     const [selectedSize, setSelectedSize] = useState(null);
+    const [lowestPrices, setLowestPrices] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchSneakerDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:3000/api/snkrs/${id}`);
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("No estás autenticado. Por favor, inicia sesión.");
+                    navigate("/login");
+                    return;
+                }
+
+                // Fetch sneaker details
+                const response = await fetch(`http://localhost:3000/api/snkrs/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }
                 const data = await response.json();
                 setSneaker(data);
 
-                // Buscar productos relacionados
+                // Fetch lowest prices for sneaker sizes
+                const lowestPricesResponse = await fetch(
+                    `http://localhost:3000/api/prices/${id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                if (!lowestPricesResponse.ok) {
+                    throw new Error(`Error HTTP: ${lowestPricesResponse.status}`);
+                }
+                const lowestPricesData = await lowestPricesResponse.json();
+
+                const pricesMap = {};
+                for (let size = 35; size <= 50; size++) {
+                    const found = lowestPricesData.find((item) => item.size === size.toString());
+                    pricesMap[size] = found ? parseFloat(found.min_price) : parseFloat(data.retail_price);
+                }
+
+                setLowestPrices(pricesMap);
+
+                // Fetch related sneakers
                 const searchQuery = data.name.split(" ").slice(0, 2).join(" ");
                 const relatedResponse = await fetch(
-                    `http://localhost:3000/api/snkrs/search?query=${searchQuery}`
+                    `http://localhost:3000/api/snkrs/search?query=${searchQuery}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
                 );
                 if (!relatedResponse.ok) {
                     throw new Error(`Error HTTP: ${relatedResponse.status}`);
                 }
                 const relatedData = await relatedResponse.json();
-
-                // Filtrar relacionados y seleccionar aleatorios
                 const filteredRelatedSneakers = relatedData
                     .filter((item) => item.id !== data.id)
                     .sort(() => 0.5 - Math.random())
                     .slice(0, 3);
-
                 setRelatedSneakers(filteredRelatedSneakers);
             } catch (error) {
                 console.error("Error al obtener detalles de la zapatilla:", error);
@@ -44,7 +81,7 @@ function SneakerDetails() {
         };
 
         fetchSneakerDetails();
-    }, [id]);
+    }, [id, navigate]);
 
     if (loading) {
         return <div className="p-4 text-lg font-bold">Cargando detalles...</div>;
@@ -64,11 +101,10 @@ function SneakerDetails() {
             return;
         }
 
-        // Redirigir a PurchaseSummary con los datos necesarios
         navigate("/purchase-summary", {
             state: {
-                sneaker, // Enviar detalles del producto
-                selectedSize, // Enviar talla seleccionada
+                sneaker,
+                selectedSize,
             },
         });
     };
@@ -89,18 +125,25 @@ function SneakerDetails() {
             <div className="col-span-6">
                 <h2 className="text-2xl font-bold mb-4">Seleccionar talla</h2>
                 <div className="grid grid-cols-4 gap-4">
-                    {[...Array(16)].map((_, index) => (
-                        <button
-                            key={index}
-                            className={`border rounded-lg p-3 text-lg ${selectedSize === 35 + index
-                                ? "bg-red-500 text-white border-red-500"
-                                : "hover:bg-gray-100"
-                                }`}
-                            onClick={() => setSelectedSize(35 + index)}
-                        >
-                            {35 + index} - ${sneaker.retail_price}
-                        </button>
-                    ))}
+                    {[...Array(16)].map((_, index) => {
+                        const size = 35 + index;
+                        const price = lowestPrices[size];
+                        const displayPrice =
+                            typeof price === "number" ? price.toFixed(2) : "N/A";
+
+                        return (
+                            <button
+                                key={size}
+                                className={`border rounded-lg p-3 text-lg ${selectedSize === size
+                                    ? "bg-red-500 text-white border-red-500"
+                                    : "hover:bg-gray-100"
+                                    }`}
+                                onClick={() => setSelectedSize(size)}
+                            >
+                                {size} - €{displayPrice}
+                            </button>
+                        );
+                    })}
                 </div>
                 <button
                     className="mt-6 bg-black text-white py-3 px-6 rounded text-lg w-full hover:bg-gray-800"

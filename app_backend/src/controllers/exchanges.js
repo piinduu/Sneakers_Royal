@@ -1,4 +1,5 @@
 const ExchangeModel = require('../models/exchanges');
+const pool = require('../config/db');
 
 // Obtener todas las ofertas de intercambio activas para el usuario autenticado
 const getActiveExchanges = async (req, res) => {
@@ -113,6 +114,116 @@ const deleteExchange = async (req, res) => {
     }
 };
 
+const getAllActiveExchanges = async (req, res) => {
+    try {
+        const exchanges = await pool.query(`
+            SELECT 
+                e.id,
+                e.size,
+                e.condition,
+                e.status,
+                e.duration,
+                e.created_at,
+                s.name AS sneaker_name,
+                s.image_url AS image_url,
+                u.username AS owner
+            FROM exchanges e
+            JOIN snkrs s ON e.snkr_id = s.id
+            JOIN users u ON e.user_id = u.id
+            WHERE e.status = 'pendiente'
+            ORDER BY e.created_at DESC
+        `);
+
+        console.log("Datos obtenidos del backend:", exchanges.rows); // Inspecciona la respuesta del backend
+
+        const formattedExchanges = exchanges.rows.map((row) => ({
+            ...row,
+            time_left: Math.max(
+                0,
+                Math.ceil(
+                    (new Date(row.created_at).getTime() +
+                        row.duration * 24 * 60 * 60 * 1000 -
+                        Date.now()) /
+                    (1000 * 60 * 60 * 24)
+                )
+            ),
+        }));
+
+        res.status(200).json(formattedExchanges);
+    } catch (error) {
+        console.error("Error al obtener todos los intercambios activos:", error);
+        res.status(500).json({ error: "Error al obtener intercambios activos" });
+    }
+};
+
+const getExchangeById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Log para verificar el ID recibido
+        console.log("ID recibido:", id);
+
+        if (isNaN(parseInt(id, 10))) {
+            console.error("ID inválido:", id);
+            return res.status(400).json({ error: "ID inválido, debe ser un número" });
+        }
+
+        const query = `
+            SELECT 
+                e.id AS exchange_id,
+                e.size AS offered_size,
+                e.condition AS offered_condition,
+                e.status,
+                e.duration,
+                e.created_at,
+                s.name AS sneaker_name,
+                s.image_url AS image_url,
+                s.description AS sneaker_description,
+                u.username AS owner,
+                ARRAY(
+                    SELECT json_build_object(
+                        'snkr_id', r.snkr_id,
+                        'size', r.size,
+                        'condition', r.condition,
+                        'name', sn.name,
+                        'image_url', sn.image_url
+                    )
+                    FROM exchange_requests r
+                    LEFT JOIN snkrs sn ON r.snkr_id = sn.id
+                    WHERE r.exchange_id = e.id
+                ) AS requested_sneakers
+            FROM exchanges e
+            JOIN snkrs s ON e.snkr_id = s.id
+            JOIN users u ON e.user_id = u.id
+            WHERE e.id = $1
+        `;
+
+        // Log para verificar la consulta
+        console.log("Ejecutando consulta para ID:", id);
+
+        const result = await pool.query(query, [id]);
+
+        // Log para verificar el resultado de la consulta
+        console.log("Resultado de la consulta:", result.rows);
+
+        if (result.rows.length === 0) {
+            console.error("No se encontró intercambio con ID:", id);
+            return res.status(404).json({ error: "Intercambio no encontrado" });
+        }
+
+        const exchange = result.rows[0];
+
+        // Log para verificar los datos procesados
+        console.log("Datos procesados antes de enviar:", exchange);
+
+        res.status(200).json(exchange);
+    } catch (error) {
+        console.error("Error al obtener detalles del intercambio:", error);
+        res.status(500).json({ error: "Error al obtener los detalles del intercambio" });
+    }
+};
+
+
 module.exports = {
     getActiveExchanges,
     getExchangesWithPagination,
@@ -120,4 +231,6 @@ module.exports = {
     updateExchange,
     updateAcceptedSneakers,
     deleteExchange,
+    getAllActiveExchanges,
+    getExchangeById,
 };

@@ -24,7 +24,7 @@ function Subheader() {
                     Adidas
                 </Link>
                 <Link
-                    to="/sneakers/jordan" // Actualizado a "jordan"
+                    to="/sneakers/jordan"
                     className="text-sm font-bold hover:text-accent transition-colors"
                 >
                     Air Jordan
@@ -46,6 +46,12 @@ function Subheader() {
                     className="text-sm font-bold hover:text-accent transition-colors"
                 >
                     Próximos lanzamientos
+                </Link>
+                <Link
+                    to="/exchanges/all"
+                    className="text-sm font-bold hover:text-accent transition-colors"
+                >
+                    Todos los intercambios
                 </Link>
             </nav>
         </div>

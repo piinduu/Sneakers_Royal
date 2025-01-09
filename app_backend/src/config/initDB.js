@@ -67,6 +67,19 @@ const createTables = async () => {
             );
         `);
 
+        // Crear tabla lowest_prices
+        // Crear tabla lowest_prices
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS lowest_prices (
+                snkr_id INT REFERENCES snkrs(id) ON DELETE CASCADE,
+                size VARCHAR(10) NOT NULL,
+                price NUMERIC(10, 2) NOT NULL,
+                user_id INT REFERENCES users(id) ON DELETE CASCADE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (snkr_id, size)
+             );
+        `);
+
         console.log('Tablas creadas exitosamente.');
         pool.end();
     } catch (error) {
