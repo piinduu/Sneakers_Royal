@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const brands = [
@@ -11,23 +11,100 @@ const brands = [
 
 function Home() {
   const navigate = useNavigate();
+  const [popularSneakers, setPopularSneakers] = useState([]);
+  const [trendingSneakers, setTrendingSneakers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleBrandClick = (category) => {
-    navigate(`/sneakers/${category.toLowerCase()}`);
+  // Función para barajar un arreglo
+  const shuffleArray = (array) => {
+    return array.sort(() => Math.random() - 0.5);
   };
+
+  useEffect(() => {
+    const fetchSneakers = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/snkrs");
+        if (!response.ok) {
+          throw new Error("Error al cargar las zapatillas");
+        }
+        const data = await response.json();
+
+        // Barajamos los resultados antes de seleccionar los primeros elementos
+        const popular = shuffleArray(
+          data.filter((sneaker) => sneaker.retail_price >= 100 && sneaker.retail_price <= 200)
+        ).slice(0, 4);
+
+        const trending = shuffleArray(
+          data.filter((sneaker) => sneaker.retail_price >= 80 && sneaker.retail_price <= 150)
+        ).slice(0, 4);
+
+        setPopularSneakers(popular);
+        setTrendingSneakers(trending);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error al cargar las zapatillas:", err);
+        setLoading(false);
+      }
+    };
+
+    fetchSneakers();
+  }, []);
+
+  if (loading) return <p>Cargando...</p>;
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-black mb-4">Marcas Populares</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* Marcas populares */}
+      <h2 className="text-lg font-bold text-black mb-4">Marcas Populares</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6">
         {brands.map((brand) => (
           <div
             key={brand.name}
             className="cursor-pointer bg-light rounded-lg shadow-md p-4 flex flex-col items-center hover:bg-gray-200"
-            onClick={() => handleBrandClick(brand.name)}
+            onClick={() => navigate(`/sneakers/${brand.name.toLowerCase()}`)}
           >
-            <img src={brand.image} alt={brand.name} className="w-20 h-20 object-contain mb-2" />
-            <p className="font-semibold text-black">{brand.name}</p>
+            <img src={brand.image} alt={brand.name} className="w-16 h-16 object-contain mb-2" />
+            <p className="font-semibold text-black text-sm">{brand.name}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Más Populares */}
+      <h2 className="text-lg font-bold text-black mt-8 mb-4">Más Populares</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {popularSneakers.map((sneaker) => (
+          <div
+            key={sneaker.id}
+            className="p-4 border rounded shadow hover:shadow-lg transition cursor-pointer bg-white"
+            onClick={() => navigate(`/sneaker/${sneaker.id}`)}
+          >
+            <img
+              src={sneaker.image_url}
+              alt={sneaker.name}
+              className="w-full h-40 object-contain mb-3 rounded"
+            />
+            <p className="font-semibold text-sm truncate">{sneaker.name}</p>
+            <p className="text-sm text-gray-600">Precio: €{sneaker.retail_price}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Tendencias */}
+      <h2 className="text-lg font-bold text-black mt-8 mb-4">Tendencias</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {trendingSneakers.map((sneaker) => (
+          <div
+            key={sneaker.id}
+            className="p-4 border rounded shadow hover:shadow-lg transition cursor-pointer bg-white"
+            onClick={() => navigate(`/sneaker/${sneaker.id}`)}
+          >
+            <img
+              src={sneaker.image_url}
+              alt={sneaker.name}
+              className="w-full h-40 object-contain mb-3 rounded"
+            />
+            <p className="font-semibold text-sm truncate">{sneaker.name}</p>
+            <p className="text-sm text-gray-600">Precio: €{sneaker.retail_price}</p>
           </div>
         ))}
       </div>

@@ -115,14 +115,31 @@ const updateExchangeAcceptedSneakers = async (exchangeId, acceptedSneakers) => {
 };
 
 // Actualizar un intercambio
-const updateExchange = async (id, status, condition) => {
-    const result = await pool.query(
-        `UPDATE exchanges 
-         SET status = $1, condition = $2 
-         WHERE id = $3 RETURNING *`,
-        [status, condition, id]
-    );
-    return result.rows[0];
+const updateExchange = async (id, status) => {
+    if (!id || !status) {
+        throw new Error("El ID y el estado son obligatorios para actualizar el intercambio.");
+    }
+
+    // Asegurarse de que `id` sea un entero
+    const query = `
+        UPDATE exchanges 
+        SET status = $1
+        WHERE id = $2 
+        RETURNING *;
+    `;
+
+    const values = [status, id];
+
+    try {
+        const result = await pool.query(query, values);
+        if (result.rows.length === 0) {
+            return null; // Si no se encuentra el intercambio, devolvemos null
+        }
+        return result.rows[0];
+    } catch (error) {
+        console.error("Error en la consulta SQL:", error);
+        throw error; // Propagamos el error al controlador
+    }
 };
 
 // Eliminar un intercambio

@@ -58,18 +58,33 @@ const createExchange = async (req, res) => {
 
 // Actualizar detalles generales del intercambio
 const updateExchange = async (req, res) => {
-    const { id } = req.params;
-    const { status, condition } = req.body;
+    const { id } = req.params; // ID recibido de los parámetros
+    const { status } = req.body; // Estado recibido del cuerpo de la solicitud
+
+    if (!status) {
+        return res.status(400).json({ error: "El campo 'status' es obligatorio." });
+    }
+
+    // Validar que el ID sea un entero
+    const exchangeId = parseInt(id, 10);
+    if (isNaN(exchangeId)) {
+        return res.status(400).json({ error: "El ID proporcionado no es válido." });
+    }
 
     try {
-        const updatedExchange = await ExchangeModel.updateExchange(id, status, condition);
+        const updatedExchange = await ExchangeModel.updateExchange(exchangeId, status);
+
         if (!updatedExchange) {
-            return res.status(404).json({ error: 'Intercambio no encontrado' });
+            return res.status(404).json({ error: "Intercambio no encontrado." });
         }
-        res.status(200).json(updatedExchange);
+
+        res.status(200).json({
+            message: "Intercambio actualizado con éxito.",
+            exchange: updatedExchange,
+        });
     } catch (error) {
-        console.error('Error al actualizar intercambio:', error);
-        res.status(500).json({ error: 'Error al actualizar intercambio' });
+        console.error("Error al actualizar intercambio:", error);
+        res.status(500).json({ error: "Error al actualizar intercambio." });
     }
 };
 
