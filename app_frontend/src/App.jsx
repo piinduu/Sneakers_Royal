@@ -20,6 +20,7 @@ const SellDetails = React.lazy(() => import("./pages/SellDetails"));
 const SellSetPrice = React.lazy(() => import("./pages/SellSetPrice"));
 const AllExchanges = React.lazy(() => import("./pages/AllExchanges"));
 const AllExchangesDetails = React.lazy(() => import("./pages/AllExchangesDetails"));
+const Profile = React.lazy(() => import("./pages/Profile"));
 
 function App() {
   return (
@@ -146,6 +147,16 @@ function App() {
                 <Header />
                 <Subheader />
                 <AllExchangesDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Header />
+                <Subheader />
+                <Profile />
               </ProtectedRoute>
             }
           />
